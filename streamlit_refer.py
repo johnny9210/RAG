@@ -19,7 +19,7 @@ from langchain.vectorstores import FAISS
 # from streamlit_chat import message
 from langchain.callbacks import get_openai_callback
 from langchain.memory import StreamlitChatMessageHistory
-openai_api_key = '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
+openai_api_key = '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'
 
 def main():
     st.set_page_config(
