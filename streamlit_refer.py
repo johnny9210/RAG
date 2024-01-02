@@ -22,6 +22,7 @@ from langchain.memory import StreamlitChatMessageHistory
 openai_api_key = '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'
 
 def main():
+    openai_api_key = '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'
     st.set_page_config(
     page_title="TigrisChat",
     page_icon=":books:")
