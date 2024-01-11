@@ -43,7 +43,7 @@ def main():
     if "processComplete" not in st.session_state:
         st.session_state.processComplete = None
 # None으로 하는 이유는 -> 해당 내용이 이후에 없기에 처음 명명
-    tab1, tab2, tab3 = st.tabs(["Cat", "Dog", "Owl"])
+    tab1, tab2, tab3 = st.tabs(["File_upload", "Search_engine", "VectorDB"])
     with tab1:
         
     # with st.sidebar:
