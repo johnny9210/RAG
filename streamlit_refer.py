@@ -20,17 +20,20 @@ from langchain.vectorstores import FAISS
 from langchain.callbacks import get_openai_callback
 from langchain.memory import StreamlitChatMessageHistory
 
-
-import streamlit as st
 import streamlit.components.v1 as components
+
+from langchain.agents import initialize_agent, AgentType
+from langchain.callbacks import StreamlitCallbackHandler
+from langchain.tools import DuckDuckGoSearchRun
 
 openai_api_key = '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'
 
 def main():
+    # st.set_page_config(
+    # page_title="TigrisChat",
+    # page_icon=":books:")
+    
     openai_api_key = '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'
-    st.set_page_config(
-    page_title="TigrisChat",
-    page_icon=":books:")
 
     st.title("_Document :red[QA Chat]_ :tiger:")
 
@@ -43,7 +46,7 @@ def main():
     if "processComplete" not in st.session_state:
         st.session_state.processComplete = None
 # None으로 하는 이유는 -> 해당 내용이 이후에 없기에 처음 명명
-    tab1, tab2, tab3 = st.tabs(["File_upload", "Search_engine", "VectorDB"])
+    tab1, tab2, tab3 = st.tabs(["Cat", "Dog", "Owl"])
     with tab1:
         
     # with st.sidebar:
@@ -103,9 +106,38 @@ def main():
         st.session_state.messages.append({"role": "assistant", "content": response})
     
     with tab2:
-        search = st.text_input("What do you want to search for?")
-        components.iframe(f"https://www.google.com/search?igu=1&ei=&q={search}", height=1000)
+        
+        st.session_state.conversation = None
+        st.session_state.chat_history = None
+        st.session_state.processComplete = None
+        # search = st.text_input("What do you want to search for?")
+        # components.iframe(f"https://www.google.com/search?igu=1&ei=&q={search}", height=1000)
+        st.title("🔎 LangChain - Chat with search")
 
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = [
+            {"role": "assistant", "content": "Hi, I'm a chatbot who can search the web. How can I help you?"}
+        ]
+
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
+
+    if prompt := st.chat_input(placeholder="Who won the Women's U.S. Open in 2018?"):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.chat_message("user").write(prompt)
+
+            if not openai_api_key:
+                st.info("Please add your OpenAI API key to continue.")
+                st.stop()
+
+            llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=openai_api_key, streaming=True)
+            search = DuckDuckGoSearchRun(name="Search")
+            search_agent = initialize_agent([search], llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, handle_parsing_errors=True)
+            with st.chat_message("assistant"):
+                st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
+                response = search_agent.run(st.session_state.messages, callbacks=[st_cb])
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.write(response)
 def tiktoken_len(text):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     tokens = tokenizer.encode(text)
