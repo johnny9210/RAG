@@ -19,6 +19,11 @@ from langchain.vectorstores import FAISS
 # from streamlit_chat import message
 from langchain.callbacks import get_openai_callback
 from langchain.memory import StreamlitChatMessageHistory
+
+
+import streamlit as st
+import streamlit.components.v1 as components
+
 openai_api_key = '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'
 
 def main():
@@ -31,18 +36,22 @@ def main():
 
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
-
+# None으로 하는 이유는 -> 해당 내용이 이후에 없기에 처음 명명
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
-
+# None으로 하는 이유는 -> 해당 내용이 이후에 없기에 처음 명명
     if "processComplete" not in st.session_state:
         st.session_state.processComplete = None
-
-    with st.sidebar:
-        uploaded_files =  st.file_uploader("Upload your file",type=['pdf','docx','csv','pptx'],accept_multiple_files=True)
+# None으로 하는 이유는 -> 해당 내용이 이후에 없기에 처음 명명
+    tab1, tab2, tab3 = st.tabs(["Cat", "Dog", "Owl"])
+    with tab1:
+        
+    # with st.sidebar:
+        uploaded_files =  st.file_uploader("Upload your file :tiger:",type=['pdf','docx','csv','pptx'],accept_multiple_files=True)
         openai_api_key = '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'
         # openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
         process = st.button("Process")
+
     if process:
         # if not openai_api_key:
         #     st.info("Please add your OpenAI API key to continue.")
@@ -58,7 +67,8 @@ def main():
     if 'messages' not in st.session_state:
         st.session_state['messages'] = [{"role": "assistant", 
                                         "content": "안녕하세요! 주어진 문서에 대해 궁금하신 것이 있으면 언제든 물어봐주세요!"}]
-
+# 초기값으로 message를 입력
+        
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
@@ -81,17 +91,20 @@ def main():
                     st.session_state.chat_history = result['chat_history']
                 response = result['answer']
                 source_documents = result['source_documents']
-
+                
                 st.markdown(response)
                 with st.expander("참고 문서 확인"):
                     st.markdown(source_documents[0].metadata['source'], help = source_documents[0].page_content)
                     # st.markdown(source_documents[1].metadata['source'], help = source_documents[1].page_content)
                     # st.markdown(source_documents[2].metadata['source'], help = source_documents[2].page_content)
                     
-
-
+    
 # Add assistant message to chat history
         st.session_state.messages.append({"role": "assistant", "content": response})
+    
+    with tab2:
+        search = st.text_input("What do you want to search for?")
+        components.iframe(f"https://www.google.com/search?igu=1&ei=&q={search}", height=1000)
 
 def tiktoken_len(text):
     tokenizer = tiktoken.get_encoding("cl100k_base")
@@ -103,9 +116,9 @@ def get_text(docs):
     doc_list = []
     
     for doc in docs:
-        file_name = doc.name  # doc 객체의 이름을 파일 이름으로 사용
+        file_name = doc.name  # doc 객체의 이름을 파일 이름으로 사용, 빈파일 생성 후 해당 파일명을 지정하는 부분
         with open(file_name, "wb") as file:  # 파일을 doc.name으로 저장
-            file.write(doc.getvalue())
+            file.write(doc.getvalue()) # 파일 불러온 후 해당 파일을 file_name으로 생성한 파일에 덮어쓰는 부분
             logger.info(f"Uploaded {file_name}")
         if '.pdf' in doc.name:
             loader = PyPDFLoader(file_name)
