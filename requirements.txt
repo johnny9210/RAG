@@ -11,3 +11,5 @@ loguru
 docx2txt
 langchain_openai
 langchain-community
+PyPDF2
+Pymupdf
