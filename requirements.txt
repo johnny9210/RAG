@@ -16,3 +16,4 @@ Pymupdf
 langchain_teddynote
 IPython
 reportlab
+Elasticsearch
